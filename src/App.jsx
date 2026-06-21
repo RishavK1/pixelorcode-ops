@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Mail,
   MessageCircle,
+  PanelLeft,
   Phone,
   Plus,
   RotateCcw,
@@ -652,7 +653,7 @@ function LeadEditor({ lead, onClose, onSave }) {
   );
 }
 
-function Sidebar({ activeView, setActiveView, counts, dataMode }) {
+function Sidebar({ activeView, setActiveView, counts, dataMode, collapsed, onToggle }) {
   const items = [
     ["command", "Command", LayoutDashboard],
     ["followups", "Follow-ups", Bell],
@@ -665,18 +666,21 @@ function Sidebar({ activeView, setActiveView, counts, dataMode }) {
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
       <div className="brand">
         <div className="brand-mark"><img src={pixelorCodeLogo} alt="PixelOrCode" /></div>
         <div>
           <strong>PixelOrCode</strong>
           <span>Ops control</span>
         </div>
+        <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          <PanelLeft size={18} />
+        </button>
       </div>
 
       <nav>
         {items.map(([key, label, Icon]) => (
-          <button key={key} className={activeView === key ? "active" : ""} onClick={() => setActiveView(key)}>
+          <button key={key} className={activeView === key ? "active" : ""} onClick={() => setActiveView(key)} title={collapsed ? label : undefined}>
             <Icon size={18} />
             <span>{label}</span>
             {key === "leads" && <em>{counts.leads}</em>}
@@ -1095,6 +1099,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [syncMessage, setSyncMessage] = useState("");
   const [activeView, setActiveView] = useState(initialView);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("sidebarCollapsed") === "1");
   const [query, setQuery] = useState("");
   const [listFilter, setListFilter] = useState("All lists");
   const [statusFilter, setStatusFilter] = useState("All statuses");
@@ -1193,6 +1198,14 @@ export default function App() {
   const navigate = (view) => {
     setActiveView(view);
     window.history.replaceState(null, "", `#${view}`);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      localStorage.setItem("sidebarCollapsed", next ? "1" : "0");
+      return next;
+    });
   };
 
   const toggleCheck = (id) => {
@@ -1496,8 +1509,8 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <Sidebar activeView={activeView} setActiveView={navigate} counts={stats} dataMode={dataMode} />
+    <div className={`app${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
+      <Sidebar activeView={activeView} setActiveView={navigate} counts={stats} dataMode={dataMode} collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
 
       <main>
         <header className="topbar">
