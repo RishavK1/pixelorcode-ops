@@ -1,0 +1,13 @@
+src/seedData.json
+public/proposals
+dist/proposals
+*.xlsx
+*.xls
+*.csv
+*.pdf
+.env
+.env.local
+.env.*.local
+private-data
+scripts
+supabase
